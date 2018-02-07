@@ -1,0 +1,30 @@
+es:
+  host: localhost
+  port: 9200
+  name: tyredb2
+db:
+  type: sqlite3
+  name: data/mdm.db
+  staging_data: "staging_data"
+  production_data: "production_data"
+  fields: "fields"
+  fields_mapping: "fields_mapping"
+  field_values: "field_values"
+  field_values_mapping: "field_values_mapping"
+fs:
+  data: data
+  format: json
+  source_files: ../scrapy_tyres/data/sources
+mdm:
+  uid: ean
+  constaints:
+    required:
+      - brand
+      - manufacturer_number
+      - product
+      - width
+      - height
+      - rim
+      - season
+    sufficient:
+      - [brand, manufacturer_number]
