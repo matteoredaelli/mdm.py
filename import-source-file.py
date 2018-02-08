@@ -28,14 +28,15 @@ uid = config.settings["mdm"]["uid"]
 conn = sqlite3.connect(config.settings["db"]["name"])
 cursor = conn.cursor()
 
-tablename = config.settings["db"]["staging_data"]
+cursor.execute('PRAGMA encoding="UTF-8"')
 
-sql = "create table IF NOT EXISTS %s (id PRIMARY KEY, json)" % tablename
+tablename = config.settings["db"]["staging_data"]
+sql = "create table IF NOT EXISTS %s (source text not null, id text not null, json, ts, PRIMARY KEY (source, id))" % tablename
 cursor.execute(sql)
 
-sql = 'insert or replace into %s (id, json) values(?, ?)' % tablename
+sql = 'insert or replace into %s (source, id, json) values(?, ?, ?)' % tablename
 
-with open(filename, 'r') as f:
+with open(filename, 'r', encoding="utf-8") as f:
     for line in f:
         line = line.strip()
         doc = json.loads(line)
@@ -50,11 +51,15 @@ with open(filename, 'r') as f:
             source = doc["source"]
         else:
             source = "_unknown"
-        id = "%s-%s" % (source, id)    
-        logging.warning("Parsing file %s with id %s from source %s" % (filename, id, source) )
-        values = (id, json.dumps(doc),)
+        
+        logging.warning("file %s: processing id = %s, source = %s" % (filename, id, source) )
+        values = (source, id, json.dumps(doc, ensure_ascii=False))
         logging.debug(sql)
         cursor.execute(sql, values)
-    
+
+sql = "update %s set ts=CURRENT_TIMESTAMP where ts is null" % tablename
+logging.debug(sql)
+cursor.execute(sql)
+
 conn.commit()
 conn.close()

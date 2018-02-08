@@ -15,13 +15,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import config
 import logging
-import utils
+import sqlite3
+import sys
 
-settings = utils.load_yaml_to_dict('config/settings.yaml')
+conn = sqlite3.connect(config.settings["db"]["name"])
+cursor = conn.cursor()
 
-#logging.basicConfig(filename='extract_products.log',level=logging.WARNING)
-logging.basicConfig(level=logging.WARNING)
+sql = sys.argv[1]
 
-# when using from command line --log=DEBUG
-# getattr(logging, loglevel.upper())
+for row in cursor.execute(sql):
+    print(row)
+
+conn.close()
