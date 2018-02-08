@@ -20,6 +20,7 @@ import logging
 import json
 import sqlite3
 import csv
+from pathlib import Path
 
 def connect():
     conn = sqlite3.connect(config.settings["db"]["name"])
@@ -46,7 +47,9 @@ def sqlToCSV(dbo, csvfile, tablename=None, sql=None):
             return
         sql = "select * from %s" % tablename
         
-    spamWriter = csv.writer(open(csvfile, 'w', newline=''),
+    outpath = config.settings["fs"]["target_dir"]
+    filename  = Path(outpath).joinpath(csvfile + ".csv")
+    spamWriter = csv.writer(open(filename, 'w', newline=''),
                                 delimiter=',') #,
                                 ##quotechar='',
                                 ##quoting=csv.QUOTE_MINIMAL)

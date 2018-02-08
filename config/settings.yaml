@@ -5,16 +5,17 @@ es:
 db:
   type: sqlite3
   name: data/mdm.db
-  staging_data: "staging_data"
-  production_data: "production_data"
-  fields: "fields"
-  fields_mapping: "fields_mapping"
-  field_values: "field_values"
-  field_values_mapping: "field_values_mapping"
+  tablename_staging_data: "staging_data"
+  tablename_production_data: "production_data"
+  tablename_fields: "fields"
+  tablename_fields_mapping: "fields_mapping"
+  tablename_fields_values: "fields_values"
+  tablename_fields_values_mapping: "fields_values_mapping"
 fs:
   data: data
   format: json
-  source_files: ../scrapy_tyres/data/sources
+  source_dir: ../scrapy_tyres/data/sources
+  target_dir: www/data
 mdm:
   uid: ean
   constaints:

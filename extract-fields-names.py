@@ -22,7 +22,7 @@ import db
 
 dbo = db.connect()
 
-tablename_data = config.settings["db"]["staging_data"]
+tablename_data = config.settings["db"]["tablename_staging_data"]
 
 keys = set()
 
@@ -31,7 +31,7 @@ for row in db.execute(dbo, sql):
     new_keys = json.loads(row[0]).keys()
     keys = keys.union(new_keys)
 
-tablename = config.settings["db"]["fields"]
+tablename = config.settings["db"]["tablename_fields"]
 
 sql = 'drop table if exists %s' % tablename
 db.execute(dbo, sql)
@@ -44,8 +44,12 @@ for v in list(keys):
     logging.warning("adding to table %s the value '%s'" % (tablename, v))
     values = (v,)
     db.execute(dbo, sql, values)
-                        
+
+## export csv
+db.sqlToCSV(dbo, tablename, tablename=tablename)
+
 db.commit(dbo)
 db.close(dbo)
+
 
 print(keys)
