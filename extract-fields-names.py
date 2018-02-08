@@ -18,35 +18,34 @@
 import config
 import logging
 import json
-import sqlite3
+import db
 
-conn = sqlite3.connect(config.settings["db"]["name"])
-cursor = conn.cursor()
+dbo = db.connect()
 
-tablename = config.settings["db"]["staging_data"]
+tablename_data = config.settings["db"]["staging_data"]
 
 keys = set()
 
-sql = 'select json from %s' % tablename
-for row in cursor.execute(sql):
+sql = 'select json from %s' % tablename_data
+for row in db.execute(dbo, sql):
     new_keys = json.loads(row[0]).keys()
     keys = keys.union(new_keys)
 
 tablename = config.settings["db"]["fields"]
 
 sql = 'drop table if exists %s' % tablename
-cursor.execute(sql)
+db.execute(dbo, sql)
 
 sql = 'create table if not exists %s (field primary key)' % tablename
-cursor.execute(sql)
+db.execute(dbo, sql)
 
 sql = 'insert into %s values (?)' % tablename
 for v in list(keys):
     logging.warning("adding to table %s the value '%s'" % (tablename, v))
     values = (v,)
-    cursor.execute(sql, values)
+    db.execute(dbo, sql, values)
                         
-conn.commit()
-conn.close()
+db.commit(dbo)
+db.close(dbo)
 
 print(keys)

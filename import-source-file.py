@@ -19,20 +19,18 @@ import config
 import logging
 import sys
 import json
-import sqlite3
+import db
 
 filename = sys.argv[1]
 
 uid = config.settings["mdm"]["uid"]
 
-conn = sqlite3.connect(config.settings["db"]["name"])
-cursor = conn.cursor()
-
-cursor.execute('PRAGMA encoding="UTF-8"')
-
 tablename = config.settings["db"]["staging_data"]
+
+dbo = db.connect()
+
 sql = "create table IF NOT EXISTS %s (source text not null, id text not null, json, ts, PRIMARY KEY (source, id))" % tablename
-cursor.execute(sql)
+db.execute(dbo, sql)
 
 sql = 'insert or replace into %s (source, id, json) values(?, ?, ?)' % tablename
 
@@ -40,7 +38,6 @@ with open(filename, 'r', encoding="utf-8") as f:
     for line in f:
         line = line.strip()
         doc = json.loads(line)
-
     
         if uid in doc:
             id = doc[uid]
@@ -55,11 +52,11 @@ with open(filename, 'r', encoding="utf-8") as f:
         logging.warning("file %s: processing id = %s, source = %s" % (filename, id, source) )
         values = (source, id, json.dumps(doc, ensure_ascii=False))
         logging.debug(sql)
-        cursor.execute(sql, values)
+        db.execute(dbo, sql, values)
 
 sql = "update %s set ts=CURRENT_TIMESTAMP where ts is null" % tablename
 logging.debug(sql)
-cursor.execute(sql)
+db.execute(dbo, sql)
 
-conn.commit()
-conn.close()
+db.commit(dbo)
+db.close(dbo)
