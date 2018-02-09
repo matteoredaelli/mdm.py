@@ -19,8 +19,11 @@ import config
 import logging
 import json
 import db
+from datetime import datetime
+now = datetime.now()
 
 dbo = db.connect()
+
 
 tablename_data = config.settings["db"]["tablename_staging_data"]
 
@@ -29,21 +32,24 @@ keys = set()
 sql = 'select json from %s' % tablename_data
 for row in db.execute(dbo, sql):
     new_keys = json.loads(row[0]).keys()
+    new_keys = set(k.lower() for k in new_keys)
     keys = keys.union(new_keys)
 
 tablename = config.settings["db"]["tablename_fields"]
 
-sql = 'drop table if exists %s' % tablename
-db.execute(dbo, sql)
+##sql = 'delete from %s' % tablename
+##db.execute(dbo, sql)
 
-sql = 'create table if not exists %s (field primary key)' % tablename
-db.execute(dbo, sql)
-
-sql = 'insert into %s values (?)' % tablename
+sql = 'insert or replace into %s (field, ts) values (?, ?)' % tablename
 for v in list(keys):
     logging.warning("adding to table %s the value '%s'" % (tablename, v))
-    values = (v,)
+    values = (v, now, )
     db.execute(dbo, sql, values)
+
+## remove old records
+sql = 'delete from %s where ts < (?)' % tablename
+values = (now,)
+db.execute(dbo, sql, values)
 
 ## export csv
 db.sqlToCSV(dbo, tablename, tablename=tablename)
@@ -51,5 +57,3 @@ db.sqlToCSV(dbo, tablename, tablename=tablename)
 db.commit(dbo)
 db.close(dbo)
 
-
-print(keys)

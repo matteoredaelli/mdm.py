@@ -20,6 +20,8 @@ import logging
 import sys
 import json
 import db
+from datetime import datetime
+now = datetime.now()
 
 filename = sys.argv[1]
 
@@ -28,11 +30,9 @@ uid = config.settings["mdm"]["uid"]
 tablename = config.settings["db"]["tablename_staging_data"]
 
 dbo = db.connect()
+db.setup(dbo)
 
-sql = "create table IF NOT EXISTS %s (source text not null, id text not null, json, ts, PRIMARY KEY (source, id))" % tablename
-db.execute(dbo, sql)
-
-sql = 'insert or replace into %s (source, id, json) values(?, ?, ?)' % tablename
+sql = 'insert or replace into %s (source, id, json, ts) values(?, ?, ?, ?)' % tablename
 
 with open(filename, 'r', encoding="utf-8") as f:
     for line in f:
@@ -50,7 +50,7 @@ with open(filename, 'r', encoding="utf-8") as f:
             source = "_unknown"
         
         logging.warning("file %s: processing id = %s, source = %s" % (filename, id, source) )
-        values = (source, id, json.dumps(doc, ensure_ascii=False))
+        values = (source, id, json.dumps(doc, ensure_ascii=False), now)
         logging.debug(sql)
         db.execute(dbo, sql, values)
 

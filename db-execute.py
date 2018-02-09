@@ -17,15 +17,14 @@
 
 import config
 import logging
-import sqlite3
+import db
 import sys
 
-conn = sqlite3.connect(config.settings["db"]["name"])
-cursor = conn.cursor()
+dbo = db.connect()
 
 sql = sys.argv[1]
 
-for row in cursor.execute(sql):
+for row in db.execute(dbo, sql):
     print(row)
 
-conn.close()
+db.close(dbo)

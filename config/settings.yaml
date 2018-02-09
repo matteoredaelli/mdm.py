@@ -6,6 +6,7 @@ db:
   type: sqlite3
   name: data/mdm.db
   tablename_staging_data: "staging_data"
+  tablename_working_data: "working_data"
   tablename_production_data: "production_data"
   tablename_fields: "fields"
   tablename_fields_mapping: "fields_mapping"

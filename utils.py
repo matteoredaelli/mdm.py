@@ -70,3 +70,36 @@ def load_yaml_to_dict(filename):
         return {}
     with open(filename, 'r') as f:
         return yaml.load(f)
+
+def dict_convert_lower(dic):
+    return dict((k.lower(), v) for k, v in dic.items())
+
+def merge2dicts(item1, item2, append=False):
+    ## TODO: append=True dow not work
+    for f in item2:
+        if not f in item1:
+            item1[f] = item2[f]
+        elif append:
+            ## multivalues are allowed
+            v1 = item1[f]
+            if not isinstance(v1, list):
+                v1 = [v1]
+            v2 = item2[f]
+            if not isinstance(v2, list):
+                v2 = [v2]
+            ## only unique values
+            v = list(set(v1 + v2))
+            ## value will be a string if there is only 1 element in the lust
+            if len(v) == 1:
+                v = v[0]
+            item1[f] = v
+    return item1
+
+def dict_rename_keys(data, fields):
+        data_new = data
+        keys = fields.keys()
+        for k in list(data.keys()):
+            if k in keys:
+                data_new[fields[k]] = data[k]
+                data_new.pop(k)
+        return data_new

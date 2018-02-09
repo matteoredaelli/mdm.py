@@ -35,11 +35,32 @@ def commit(dbo):
     dbo["connection"].commit()
     
 def execute(dbo, sql, values=None):
+    logging.warning(sql)
     if values:
         return dbo["cursor"].execute(sql, values)
     
     return dbo["cursor"].execute(sql)
 
+def fetchall(dbo):
+    return dbo["cursor"].fetchall()
+    
+def setup(dbo):
+    tablename = config.settings["db"]["tablename_staging_data"]
+    sql = "create table IF NOT EXISTS %s (source text not null, id text not null, json, ts timestamp, PRIMARY KEY (source, id))" % tablename
+    execute(dbo, sql)
+    
+    tablename = config.settings["db"]["tablename_fields"]
+    ##sql = 'drop table if exists %s' % tablename
+    ##db.execute(dbo, sql)
+    sql = 'create table if not exists %s (field primary key, rename_to, ts timestamp)' % tablename
+    execute(dbo, sql)
+    
+    tablename = config.settings["db"]["tablename_fields_values"]
+    sql = 'create table if not exists %s (field, value, rename_to, ts timestamp, primary key (field, value))' % tablename
+    execute(dbo, sql)
+
+    commit(dbo)
+    
 def sqlToCSV(dbo, csvfile, tablename=None, sql=None):
     if sql is None:
         if tablename is None:
@@ -55,3 +76,14 @@ def sqlToCSV(dbo, csvfile, tablename=None, sql=None):
                                 ##quoting=csv.QUOTE_MINIMAL)
     for row in dbo["cursor"].execute(sql):
         spamWriter.writerow(row)
+
+def CSVToSql(dbo, csvfile, tablename):
+    path = config.settings["fs"]["target_dir"]
+    filename  = Path(path).joinpath(csvfile + ".csv")
+    with open(filename, newline='') as f:
+        reader = csv.reader(f, delimiter=',', quoting=csv.QUOTE_NONE)
+        for row in reader:
+            print(row)
+            ## TODO
+
+            
