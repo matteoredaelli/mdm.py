@@ -23,8 +23,8 @@ import utils
 
 dbo = db.connect()
 
-tablename_staging = config.settings["db"]["tablename_staging_data"]
-tablename_working = config.settings["db"]["tablename_working_data"]
+tablename_staging = config.settings["db"]["tablename_s_data"]
+tablename_working = config.settings["db"]["tablename_w_data_mapping_fields"]
 tablename_fields = config.settings["db"]["tablename_fields"]
 
 ## extract the  fields of teh new production tble
@@ -65,7 +65,7 @@ for row in rows:
     db.execute(dbo, sql_insert, values)
 
 ## export csv
-db.sqlToCSV(dbo, tablename_working, tablename=tablename_working)
+db.sql2csv(dbo, tablename_working, tablename=tablename_working)
 
 db.commit(dbo)
 db.close(dbo)

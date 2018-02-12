@@ -27,7 +27,7 @@ filename = sys.argv[1]
 
 uid = config.settings["mdm"]["uid"]
 
-tablename = config.settings["db"]["tablename_staging_data"]
+tablename = config.settings["db"]["tablename_s_data"]
 
 dbo = db.connect()
 db.setup(dbo)

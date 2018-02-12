@@ -26,6 +26,7 @@ def connect():
     conn = sqlite3.connect(config.settings["db"]["name"])
     cursor = conn.cursor()
     cursor.execute('PRAGMA encoding="UTF-8"')
+    ##cursor.execute('.nullvalue NULL')
     return {"connection": conn, "cursor": cursor}
 
 def close(dbo):
@@ -45,7 +46,7 @@ def fetchall(dbo):
     return dbo["cursor"].fetchall()
     
 def setup(dbo):
-    tablename = config.settings["db"]["tablename_staging_data"]
+    tablename = config.settings["db"]["tablename_s_data"]
     sql = "create table IF NOT EXISTS %s (source text not null, id text not null, json, ts timestamp, PRIMARY KEY (source, id))" % tablename
     execute(dbo, sql)
     
@@ -61,10 +62,10 @@ def setup(dbo):
 
     commit(dbo)
     
-def sqlToCSV(dbo, csvfile, tablename=None, sql=None):
+def sql2csv(dbo, csvfile, tablename=None, sql=None):
     if sql is None:
         if tablename is None:
-            logging.error("sqlToCSV: tablename or sql must exist")
+            logging.error("sql2csv: tablename or sql must exist")
             return
         sql = "select * from %s" % tablename
         
@@ -77,13 +78,18 @@ def sqlToCSV(dbo, csvfile, tablename=None, sql=None):
     for row in dbo["cursor"].execute(sql):
         spamWriter.writerow(row)
 
-def CSVToSql(dbo, csvfile, tablename):
+def csv2sql(dbo, csvfile, tablename):
     path = config.settings["fs"]["target_dir"]
     filename  = Path(path).joinpath(csvfile + ".csv")
     with open(filename, newline='') as f:
+        sql = "delete from %s" % tablename
+        execute(dbo, sql)
         reader = csv.reader(f, delimiter=',', quoting=csv.QUOTE_NONE)
         for row in reader:
-            print(row)
-            ## TODO
+            question_marks = ", ?" * len(row)
+            values = tuple(row)
+            sql = "insert or replace into %s values(%s)" % (tablename, question_marks[1:])
+            execute(dbo, sql, values)
+        commit(dbo)
 
             

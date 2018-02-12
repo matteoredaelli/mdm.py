@@ -5,13 +5,12 @@ es:
 db:
   type: sqlite3
   name: data/mdm.db
-  tablename_staging_data: "staging_data"
-  tablename_working_data: "working_data"
-  tablename_production_data: "production_data"
+  tablename_s_data: "s_data"
+  tablename_w_data_mapping_fields: "w_data_mapping_fields"
+  tablename_w_data_mapping_values: "w_data_mapping_values"
+  tablename_dim_data: "data"
   tablename_fields: "fields"
-  tablename_fields_mapping: "fields_mapping"
   tablename_fields_values: "fields_values"
-  tablename_fields_values_mapping: "fields_values_mapping"
 fs:
   data: data
   format: json

@@ -20,12 +20,13 @@ import logging
 import json
 import db
 from datetime import datetime
+
 now = datetime.now()
 
 dbo = db.connect()
 
 
-tablename_data = config.settings["db"]["tablename_staging_data"]
+tablename_data = config.settings["db"]["tablename_s_data"]
 
 keys = set()
 
@@ -40,19 +41,22 @@ tablename = config.settings["db"]["tablename_fields"]
 ##sql = 'delete from %s' % tablename
 ##db.execute(dbo, sql)
 
-sql = 'insert or replace into %s (field, ts) values (?, ?)' % tablename
+sql_ins = 'insert or ignore into %s (ts, field) values (?, ?)' % (tablename)
+sql_upd = 'update %s set ts=? where field=?' % tablename
 for v in list(keys):
     logging.warning("adding to table %s the value '%s'" % (tablename, v))
-    values = (v, now, )
-    db.execute(dbo, sql, values)
-
+    values = (now, v,)
+    db.execute(dbo, sql_ins, values)
+    db.execute(dbo, sql_upd, values)
+    db.commit(dbo)
+    
 ## remove old records
 sql = 'delete from %s where ts < (?)' % tablename
 values = (now,)
-db.execute(dbo, sql, values)
+##db.execute(dbo, sql, values)
 
 ## export csv
-db.sqlToCSV(dbo, tablename, tablename=tablename)
+db.sql2csv(dbo, tablename, tablename=tablename)
 
 db.commit(dbo)
 db.close(dbo)
