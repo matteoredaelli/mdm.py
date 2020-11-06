@@ -1,0 +1,4 @@
+pyyaml
+config
+pysqlite3
+pandas

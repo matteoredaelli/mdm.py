@@ -14,7 +14,7 @@ db:
 fs:
   data: data
   format: json
-  source_dir: ../scrapy_tyres/data/sources
+  source_dir: data/sources
   target_dir: www/data
 mdm:
   uid: ean

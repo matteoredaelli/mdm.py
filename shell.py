@@ -16,12 +16,22 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import sys
 import db
 import mdm.staging
+import argparse
 
-filename = sys.argv[1]
+parser = argparse.ArgumentParser(prog='shell.py')
+parser.add_argument('cmd')
+parser.add_argument('--filename', help=' of the %(prog)s program')
+args = parser.parse_args()
+
 dbo = db.connect()
-mdm.staging.load_s_data(dbo, filename)
+
+if cmd == "load_s_data":
+    filename = args.filename
+    mdm.staging.load_s_data(dbo, filename)
+
+
+
 db.commit(dbo)
 db.close(dbo)
